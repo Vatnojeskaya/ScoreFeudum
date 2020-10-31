@@ -1,0 +1,167 @@
+function onload()
+    NonInt = {'fcc0ff', '8d25ab', '9c5bf8', '491a00', '8d3d4e'}
+
+    guild_position =
+    {
+      { --alchemistes
+        {-33.15,  3,  9.70},
+        { -33.15, 3,  6.96},
+        { -33.15, 3,  6.13}
+      },
+      { -- knight
+        {33.57, 3,  6.89},
+        {33.57, 3,  9.59},
+        {33.57, 3,  10.47}
+      },
+      { --merchant
+        {-33.15,  3,  1.05},
+        { -33.15, 3,  -1.39},
+        { -33.15, 3,  -2.21}
+      },
+      { -- monk
+        {33.57, 3,  -9.77},
+        {33.57, 3,  -7.09},
+        {33.57, 3,  -6.22}
+
+      },
+      { --noble
+        {33.57, 3,  -1.45},
+        {33.57, 3,  1.29},
+        {33.57, 3,  2.15}
+      },
+      { -- farmer
+        {-33.15,  3,  -7.02},
+        {-33.15,  3,  -9.73},
+        {-33.15,  3,  -10.61}
+      }
+    }
+
+    for i=1, #NonInt, 1 do
+        if getObjectFromGUID(NonInt[i]) ~= nil then
+        getObjectFromGUID(NonInt[i]).interactable = false
+        end
+    end
+end
+
+
+function findObjectOnTop(params)
+
+  local objList = Physics.cast({
+      origin = params.my_pos, direction = {0,1,0}, type = params.my_type, size = {params.radius_xz, params.radius_y, params.radius_xz},
+      max_distance = 0, debug = false,
+  })
+
+  local refinedList = {}
+
+  for key, value in ipairs(objList) do
+    table.insert(refinedList, value.hit_object)
+  end
+
+  return refinedList
+
+end
+
+function getTitleType(value)
+
+  local title_type = ""
+  local temp_image = value.getCustomObject()
+  local temp_name = value.getName()
+  local temp_url= ""
+  if temp_image ~= nil then
+    if (temp_image['image'] ~= nil) then
+      if not value.is_face_down then
+        temp_url = temp_image['image']
+      else
+        temp_url = temp_image['image_bottom']
+      end
+      if (temp_url == 'https://i.imgur.com/hk15lLU.jpg') then
+        title_type = 'farm'
+      elseif (temp_url == 'https://i.imgur.com/yt2yOIJ.jpg') then
+        title_type = 'outpost'
+      elseif (temp_url == 'https://i.imgur.com/UirRzRn.jpg') then
+        title_type = 'town'
+      end
+    end
+    if temp_name ~= nil then
+      if temp_name == 'fief' then
+        title_type = 'fief'
+      end
+    end
+  end
+
+  return title_type
+end
+
+function onObjectDrop( player_color,  dropped_object)
+
+  local object = dropped_object.tag
+  --log(object,'object')
+
+  if object == 'Card' then
+    if not dropped_object.is_face_down then
+
+      local ldscp_pos = dropped_object.getPosition()
+
+      local table_title = detectNearestLocationLandscape(ldscp_pos)
+
+    end
+  end
+end
+
+function detectNearestLocationLandscape(position)
+
+  local table_distance = {}
+  local table_title = {}
+  local point_on_boardmap = {}
+
+  --log(ldscp_pos,'ldscp_pos')
+  point_on_boardmap = {position[1], 1.16, position[3]}
+  --log(point_on_boardmap,'point_on_boardmap')
+
+  local params = {
+    my_pos = point_on_boardmap,
+    my_type = 2,
+    radius_y = 5,
+    radius_xz = 5
+  }
+  local ldscp_hit = findObjectOnTop(params)
+  --log(ldscp_hit,'ldscp_hit')
+
+  for key, object_hit in pairs(ldscp_hit) do
+
+    local object_title = getTitleType(object_hit)
+
+    --log(object_title,'object_title')
+
+    if (object_title == 'outpost') or (object_title == 'farm') or (object_title == 'town') or (object_title == 'fief') then
+      local temp_distance = position:distance(object_hit.getPosition())
+      local object_GUID = object_hit.getGUID()
+
+      table.insert(table_distance, temp_distance)
+      table.insert(table_title, object_GUID)
+
+    end
+  end
+
+  local n = #table_distance
+  while n > 1 do
+    if table_distance[1] > table_distance[2] then
+      table.remove(table_distance, 1)
+      table.remove(table_title, 1)
+    else table.remove(table_distance, 2)
+      table.remove(table_title, 2)
+    end
+    n = #table_distance
+  end
+
+  --log(table_title,'table_title après remove')
+  --Mettre en surbrillance le lieu retenu
+
+  local title_spoted = getObjectFromGUID(table_title[1])
+
+  if title_spoted ~= nil then
+    title_spoted.highlightOn({1,1,1}, 1.5)
+  end
+
+  return table_title[1]
+end
