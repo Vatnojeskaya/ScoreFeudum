@@ -1,6 +1,9 @@
 function onload()
     NonInt = {'fcc0ff', '8d25ab', '9c5bf8', '491a00', '8d3d4e'}
 
+    conifers_guid = {'9624aa', '810f16', '6dd6b8', '86034a', '0e3c81', 'deddbf'}
+    squirrels_conifers = nil
+
     guild_position =
     {
       { --alchemistes
@@ -41,7 +44,59 @@ function onload()
         getObjectFromGUID(NonInt[i]).interactable = false
         end
     end
+
+    local conifer = getObjectFromGUID('86034a')
+
+    params = {
+    click_function = "Conifers",
+    function_owner = self,
+    label          = "Écureuils & Conifères\nSquirrels & Conifers",
+    position       = {-18, 0.3, 4},
+    rotation       = {0,180,0},
+    width          = 4500,
+    height         = 1000,
+    font_size      = 340,
+    color          = {0.6, 0.5, 0.2},
+    font_color     = {0,0,0},
+    tooltip        = "Jouer avec l'extension Écureuils & Conifères\nPlay with Squirrels & Conifers",
+}
+    conifer.createButton(params)
+
+  params = {
+    click_function = "NoConifers",
+    function_owner = self,
+    label          = "Sans Écureuils & Conifères\nWithout Squirrels & Conifers",
+    position       = {-28, 0.3, 4},
+    rotation       = {0,180,0},
+    width          = 4500,
+    height         = 1000,
+    font_size      = 340,
+    color          = {0.6, 0.5, 0.2},
+    font_color     = {0,0,0},
+    tooltip        = "Ne pas jouer avec l'extension Écureuils & Conifères\nNo play with Squirrels & Conifers",
+}
+    conifer.createButton(params)
+
 end
+
+function NoConifers()
+
+  broadcastToAll("Vous ne jouez pas avec Écureuils & Conifères\nYou don't play with Squirrels & Conifers", {0.6, 0.5, 0.2})
+  for i = 1,6 do
+    getObjectFromGUID(conifers_guid[i]).destruct()
+  end
+  squirrels_conifers = false
+end
+
+function Conifers()
+
+  local conifer = getObjectFromGUID('86034a')
+  broadcastToAll('Vous jouez avec Écureuils & Conifères\nYou play with Squirrels & Conifers', {0.6, 0.5, 0.2})
+  conifer.clearButtons()
+  squirrels_conifers = true
+
+end
+
 
 
 function findObjectOnTop(params)
