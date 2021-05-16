@@ -55,6 +55,7 @@ function onload()
   --  self.createButton(params)
 
   table_missing = {}
+
   table_missing["White"] = false
   table_missing["Pink"] = false
   table_missing["Green"] = false
@@ -64,6 +65,7 @@ function onload()
 
 
   table_zone = {}
+
   table_zone["White"] = 'e09210'
   table_zone["Pink"] = '7cb0f1'
   table_zone["Green"] = 'f1d518'
@@ -76,12 +78,16 @@ function onload()
   bool_4player = true
 
   table_points = {}
+
   table_points['pink'] = 0
   table_points['red'] = 0
   table_points['green'] = 0
   table_points['blue'] = 0
   table_points['yellow'] = 0
   table_points['white'] = 0
+
+  GREEN = getObjectFromGUID('e74e7f').getColorTint()
+
 
   guild_position =
   {
@@ -163,7 +169,8 @@ function onload()
     }
     self.createButton(params)
 
-  COLOR ={'740bb1','1b257c','e74e7f','850665','3f489d','6c0762'}
+  COLOR ={'740bb1','1b257c','e74e7f','850665','3f489d','bde4fc'}
+
 
   for key, values in pairs(COLOR) do
     -- on modifie direct la table COLOR
@@ -300,6 +307,7 @@ function guildCount(guild_number)
     nb_player = nb_player+1
   end
   if getObjectFromGUID('610c42') ~= nil then
+    getObjectFromGUID('610c42').highlightOn({1,1,1}, 40)
     table_point['Pink'] = 0
     nb_player = nb_player+1
   end
@@ -411,7 +419,7 @@ function setInfluenceToPlayer(obj)
     zoneGuid = table_zone["Pink"]
     x_lag = -7
     y_lag = 6
-  elseif  color == stringColorToRGB("Green") then
+  elseif  color == GREEN then
     zoneGuid = table_zone["Green"]
     x_lag = -7
     y_lag = 6
@@ -749,7 +757,7 @@ function onObjectDrop(player_color, dropped_object  )
           -- check influence is drop in his the zone
           for key_zone, value_zone in pairs(temp_table) do
             if value_zone == dropped_object then
-              broadcastToAll("influence have been place immediatly on guild\n")
+              broadcastToAll("Le pion d'influence a été immédiatement positionné sur la guilde\n")
               broadcastToAll(key, stringColorToRGB(key))
               bool_update_guild = true
               break
@@ -998,8 +1006,8 @@ function calculScoreLandscape()
       end
     end
   end
-  log(score_ldscp,'final')
-  log('nouveau calcul')
+  --log(score_ldscp,'final')
+  --log('nouveau calcul')
   return score_ldscp
 end
 
@@ -1567,7 +1575,7 @@ function moveEpochMarker()
           local obj_marker = getObjectFromGUID('3976bc')
           obj_marker.setPositionSmooth(EPOCH_MARKER[i+1], false, false)
           new_pos = EPOCH_MARKER[i+1]
-        else printToAll('The Game is over', {r=0.14, g=0.70, b=0.26})
+        else printToAll('Le jeu est terminé\nThe game is over', {r=0.14, g=0.70, b=0.26})
         end
       end
     end
@@ -1634,12 +1642,11 @@ function printScore(my_table)
     'red',
     'green',
     'blue',
-    'yellow',
-    'white',
+    'yellow'
   }
 
   local affichage = ''
-  for i = 6, 1, -1 do
+  for i = 5, 1, -1 do
     if my_table[i] ~= nil then
     affichage = color[i].." = "..my_table[i].."\n"..affichage
     end
@@ -1673,9 +1680,13 @@ function calculateUseScore(new_pos_marker)
     printToAll('Final scoring')
     printScore(final_scoring)
 
+    local grand_empire = calculScoreAllColorsIdenticalLocation()
+    printToAll('Grand empire <Lieux et bonus des fiefs>\nGrand empire < locations and fiefdoms bonus >')
+    printScore(grand_empire)
+
     score = addTwoScores(score_epoch, final_scoring)
 
-    local msg = "Game over. Don't forget to add your royal writ with king's seal !!  Thanks"
+    local msg = "Le jeu est terminé, n'oubliez pas d'ajouter les scores des ordonnances royales contenant un sceau!\nGame over. Don't forget to add your royal writ with king's seal !!  Thanks"
     local rgb = {r=0.14, g=0.70, b=0.26}
     broadcastToAll(msg, rgb)
   end
